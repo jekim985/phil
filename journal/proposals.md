@@ -4476,3 +4476,17 @@ against this cycle's live lease (contrary to its own tick-type rule) and clobber
 - **P9, P8, P4, P7, subclass auto-tagger, P1, P2, P3(a): Status: unchanged (PROPOSED).**
 - **Andersson `e746d7e1ba99`:** still open past its end date (mark +$0.60), on the known
   void-path issue. Unchanged.
+
+## 2026-10-24T16:32Z - hourly (operator machine)
+
+- **P12 (operator-machine network reach to Polymarket): Status: PROPOSED, HIGH.** The first
+  operator-runner cycle since 2026-10-06 21:00Z (lease taken by loop.sh 16:15:46Z) could not
+  reach `gamma-api.polymarket.com` at all: `core/resolve.py` logged 80 consecutive
+  `fetch failed ... after 3 tries: [WinError 10054]` (connection forcibly closed by the remote
+  host) and was killed at the 10-minute background limit with no ledger/forecast writes. Every
+  market failed, including ones that resolved fine from the cloud 2h earlier, so this is a
+  network-path block on this machine (ISP/region/VPN), not a gamma outage. Consequences: settle,
+  scan, quote/monitor and any `--real` twin are all impossible from this runner, yet the runner
+  still takes the lease and blocks the cloud runner for up to 50 min. Ask: (a) restore the
+  route (VPN/proxy) before running loop.sh here, or (b) have loop.sh pre-flight one gamma GET
+  and skip taking the lease when it fails, so a blind runner never displaces a working one.
